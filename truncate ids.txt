@@ -1,0 +1,14 @@
+Befor truncate id the vf code is :
+
+<apex:page standardController="Account" title="Workspace corresponding to an account">
+  <apex:iframe scrolling="true" title="Account Workspace" src="<WEBSITE URL?sfSession={!$Api.Session_ID}&sfUrl={!$Api.Partner_Server_URL_70}&smallDisplay=Y&ws={!URLENCODE(account.id)}"/>
+</apex:page>
+
+After truncate id code is:
+
+<apex:page standardController="Account" title="Workspace corresponding to an account">
+  <apex:iframe scrolling="true" title="Account Workspace" src="<WEBSITE URL?sfSession={!$Api.Session_ID}&sfUrl={!$Api.Partner_Server_URL_70}&smallDisplay=Y&ws={!URLENCODE(LEFT(account.id,15))}"/>
+</apex:page>
+
+URL:
+https://developer.salesforce.com/forums/ForumsMain?id=906F0000000AgvBIAS

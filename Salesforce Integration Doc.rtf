@@ -1,0 +1,112 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Calibri;}}
+{\*\generator Riched20 6.3.9600}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9\par
+Introduction\par
+\par
+Most enterprise-level applications have a need to integrate with other applications used by the same organization. These integration usually cater to different layers, like Data, Business Logic, Presentation and Security, depending on the requirement. This helps organizations achieve greater levels of operational consistency, efficiency and quality.\par
+\par
+This article, the first in the series Learning Salesforce Integration, outlines a few of the options available for integrating other client applications with the Force.com platform. The main focus is on Web Service integration, including both inbound and outbound to Force.com. The client application considered in this article is Oracle Siebel CRM.\par
+\par
+ \par
+Possible Ways to Integrate with Salesforce Force.com\par
+\par
+Speaking further on the different layers and integration features available at each level for an enterprise-level application, we have:\par
+\par
+    User Interface\par
+    Business Logic\par
+    Data\par
+\par
+User Interface Integration is one great way to surface various applications inside Salesforce with little redesign of each individual app. It provides your users a single point of entry into multiple applications. The most relevant example is Facebook Apps, which appears to be in the Facebook instance but in reality, the content is served from different application vendors.\par
+\par
+Business Logic Integration uses Apex Web Services for Inbound and Apex Callouts for Outbound. It typically handles a scenario where business logic is spread across several applications to implement the complete end-to-end business process. An example would be building complex logic on the data received before committing it into Salesforce.\par
+\par
+Data Integration uses SOAP APIs and REST APIs. It typically handles data synchronization requirements, where one application in an enterprise acts as the primary source for a particular business object, like Account. It requires no coding in Salesforce, which is an advantage, but then it cannot implement any custom logic.\par
+\par
+As mentioned earlier, our focus for the rest of this document will be on the Business Logic and Data Integration layers, which implement Web Services.\par
+\par
+ Business Logic Integration helps extend the business logic present in Force.com with  outside platforms. In the case of inbound logic integration, it is handled using Apex Web Services.\par
+\par
+Apex Web Services allow us to write logic and expose it as a web service with external applications. It gives us flexibility in adding custom logic before modifying the Force.com standard or custom objects data. We can apply project-specific business logic while exposing web services.\par
+\par
+It requires knowledge of Apex for writing the Apex classes that expose web services to be invoked by client applications. The steps involved are:\par
+\par
+    Creating a global class that is accessible across all Apex scripts and not just the source Salesforce application. It forms the container for everything else.\par
+    Creating an inner Apex class that forms the actual request message of the WSDL. Variables that need to be accessed by the other application through the WSDL should be mentioned here.\par
+    Creating an Apex method that is exposed as the web service. It defines data mapping the inner class variables to Salesforce objects and fields, any logic that needs to be implemented and the operation to be executed, like insert, etc.\par
+    Finally, generating the WSDL from the path Setup | App Setup | Develop | Apex Classes and sharing it with the client application.\par
+\par
+Apex Callouts enable invoking external web services that utilize SOAP, and WSDL or REST Services. This way the outbound scenario for web service integration can be handled. Two ways to generate callouts are importing the WSDL into Apex or by HTTP (RESTful) Services classes.\par
+\par
+    WSDL2Apex: Consuming the WSDL document provided by the client application automatically generates the Apex class. This Apex class handles the rest, like constructing the SOAP XML while invoking the web service, data transmission and parsing the response. You can even manipulate the HTTP Header while sending out a message.\par
+    HTTP Services: This is the other way for outbound web service integration that enables Salesforce to integrate to REST-based services. Apex classes like HTTP, HTTPRequest and HTTPResponse support the ability to initiate an HTTP request or response, develop HTTP requests and handle HTTP responses respectively.\par
+\par
+Data Integration helps us in maintaining consistency in the application data between multiple systems that need to be in sync. One way we can achieve talking about real-time synchronization of data between systems is by using SOAP APIs, among other available options.\par
+\par
+SOAP API lets you create, retrieve, update or delete records, such as accounts, leads and custom objects. With more than 20 different calls, SOAP API also allows you to maintain passwords, perform searches and much more. Use SOAP API in any language that supports web services. It provides two WSDLs to choose from \endash\par
+\par
+    Enterprise Web Services WSDL \endash  Used for building client applications for a single Salesforce organization. The enterprise WSDL is strongly typed, which means that it contains objects and fields with specific data types. Customers who use the enterprise WSDL document must download and re-consume it whenever their organization makes a change to its custom objects or fields, or whenever they want to use a different version of the API.\par
+    Partner Web Services WSDL \endash  Used for building client applications for multiple organizations. As a loosely typed representation of the Salesforce data model that works with name-value pairs of field names and values, instead of specific data types, it can be used to access data within any organization. The partner WSDL document only needs to be downloaded and consumed once per version of the API.\par
+\par
+To access the current WSDLs for your organization, log into your Salesforce organization and from Setup, click Develop -> API -> Generate Enterprise/Partner WSDL. In general, the enterprise WSDL is more straightforward to use, while the partner WSDL is more flexible and dynamically adaptable to different organizations, allowing you to write a single application that can be used for multiple users and multiple organizations.\par
+\par
+REST API provides a powerful, convenient, and simple REST-based web services interface for interacting with Salesforce. Its advantages include ease of integration and development, and it\rquote s an excellent choice of technology for use with mobile applications and Web projects.\par
+\par
+Security Considerations\par
+\par
+Accessing Salesforce data or business logic via any of the above-mentioned inbound interfacing ways requires the client application to authenticate. This authentication is subject to the same security protections that are used in the Salesforce UI. Using valid credentials for the Salesforce organization being accessed, the server authenticates the credentials and, if valid, provides the client application with:\par
+\par
+    a sessionId, that must be set into the session header so that all subsequent calls to the web service are authenticated\par
+    a serverUrl, that is the end point for the client application\rquote s web service requests\par
+\par
+Additional security considerations include configuring profiles/permission sets with appropriate features, settings and objects enabled and assigning users to them. One such permission is API Enabled, which needs to be granted to the user for accessing the APIs.\par
+\par
+Testing with soapUI\par
+\par
+Using the Salesforce-generated WSDLs is not straightforward and therefore, to have a feel for the same you can opt for soapUI as a testing tool before actually getting into real application integration development. The process remains the same, i.e., importing the WSDL as a new project in soapUI and modifying the request message. But few points to remember \endash\par
+\par
+    Independent of the path you are following to integrate, i.e., SOAP API or Apex Web Services, there are two steps to implement the inbound integration:\par
+        Obtaining the session ID and the server URL using the SOAP API login() call\par
+        Using these details to invoke the actual operation, like create() or any custom operation exposed using Apex Web Services. The session ID is to be provided in the session header section and the server URL needs to be set as the end point for the actual operation.\par
+    Structure the request message per the object and fields that need to be exchanged. For example:\par
+        Creating/updating relationships using the create() API call, like creating a new Account and Contact, Account being the parent of the Contact.\par
+        Creating different unrelated object records in a single call.\par
+\par
+ \par
+Business Scenario\par
+\par
+Let\rquote s walk through a hypothetical scenario for integrating Force.com with a client application, in this case, Oracle Siebel CRM. Techflex Pvt. Ltd. is a medium-sized manufacturing company that uses Oracle Siebel CRM (on premise) for managing its sales of packaging machines. Recently, it expanded internationally and the management introduced Salesforce Professional Edition for the new branch. After the initial bulk data load of Accounts, Contacts, Opportunities and Leads into the Salesforce application, the IT team at Techflex needed to build interfaces to keep both applications in sync with respect to the overall customer details (Accounts) and the customers\rquote  primary contacts (Contacts).\par
+\par
+Siebel2Salesforce Account and Contact Interface\par
+\par
+For Techflex, Siebel remains the primary application for maintaining Accounts and Contacts. An interface is required to send the Account/Contact details to Salesforce as soon as it is created or updated in Siebel.\par
+\par
+Design Considerations:\par
+\par
+    Integration Path \endash  As this interface deals with a simple exchange of data without any transformation or complex logic, the best approach to use is SOAP API on the Salesforce side and Outbound Web Service on the Siebel side.\par
+    Security \endash  Siebel needs to send the Session ID in the XML message sent to Salesforce. This sessionId can be obtained using the login() API call with a valid Salesforce user credential.\par
+    Outbound WS/End Points \endash  Specifically for Siebel2Salesforce integration, we need to duplicate the Outbound WS record because of the two-step execution process. The first record needs to have the login URL as the end point, whereas the second record needs to have the server URL as the end point (refer to Testing with soapUI).\par
+\par
+Steps to Implement:\par
+\par
+    Import the Salesforce Enterprise WSDL into Siebel Tools \endash  This creates the outbound proxy business service and Integration Objects in Siebel Tools, and the Web Service administration document (XML file) that needs to be imported into the Siebel Client to create the Outbound Web Service record. Duplicate the Outbound WS record to point to the server URL.\par
+    In Siebel Tools, modify the create Integration Object to add the fields that need to be exchanged through this interface. In general, include all required Salesforce fields for the specific object and any external ID fields. [The Salesforce WSDL does not automatically create the Salesforce Objects and the respective fields in Siebel within the Integration Objects created.]\par
+    Create a Workflow similar to the one shown below.\par
+    Finally, develop a Request Filter service that transforms the Siebel Message per the Salesforce format, including the Session Header and Body within the SOAP Envelope.\par
+\par
+There are no development efforts required on the Salesforce side, except for creating any new fields needed for capturing complete Account and Contact details to match the existing Siebel Business Object Structure.\par
+\par
+Note: If after publishing the interface any new fields are created on the Salesforce side, the new WSDL needs to be shared with the other application.\par
+\par
+ \par
+Summary\par
+\par
+This article listed a few ways of integrating Force.com using Web Services. Now we can distinguish between situations in order to identify the best possible way to integrate. For example, if we need to have a straightforward data exchange between a client application and Salesforce, we should go with the Data Integration options like SOAP API, but in case we need to have some logic before or after the data is committed or sent out of Salesforce,  we should opt for the Business Logic Integration options like Apex Web Services or Apex Callouts.\par
+\par
+We also learned about security needs and using soapUI for testing. Finally, the elaborated scenario of Techflex Pvt. Ltd. illustrated a simple integration requirement that used SOAP API over Apex because there were no custom logic needs.\par
+\par
+Next in this series, Force.com SOAP API Sample WSDL Structures discusses in detail about SOAP API and presents several common business scenarios requiring the exchange of data between systems. The working request messages illustrated should give a quick way to head start the learning.\par
+\par
+ \par
+\par
+}
+ 
